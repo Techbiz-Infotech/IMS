@@ -2,7 +2,7 @@ report 50052 "Monthly TEU Summary report"
 {
     UsageCategory = ReportsAndAnalysis;
     ApplicationArea = All;
-    Caption = 'Container Monthly Analysis';
+    Caption = 'TEU Monthly Sales Analysis';
     ProcessingOnly = true;
 
     dataset { }
@@ -202,7 +202,7 @@ report 50052 "Monthly TEU Summary report"
     begin
         ExcelBuf.SelectOrAddSheet('Customer Analysis');
 
-        ExcelBuf.AddColumn('Customer', false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
+        ExcelBuf.AddColumn('Consignee', false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Salesperson', false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
         foreach MonthTxt in MonthList do
             ExcelBuf.AddColumn(MonthTxt, false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
@@ -234,7 +234,7 @@ report 50052 "Monthly TEU Summary report"
     begin
         ExcelBuf.SelectOrAddSheet('Clearing Agent Analysis');
 
-        ExcelBuf.AddColumn('Agent', false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
+        ExcelBuf.AddColumn('Clearing Agent', false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
         ExcelBuf.AddColumn('Salesperson', false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
         foreach MonthTxt in MonthList do
             ExcelBuf.AddColumn(MonthTxt, false, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
