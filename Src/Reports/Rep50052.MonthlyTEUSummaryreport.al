@@ -281,5 +281,17 @@ report 50052 "Monthly TEU Summary report"
             end;
             ExcelBuf.NewRow();
         end;
+
+        // Total row for all salespersons
+        ExcelBuf.AddColumn('Total', true, '', true, false, false, '', ExcelBuf."Cell Type"::Text);
+        foreach Sales in SalesPersonList do begin
+            Total := 0;
+            if SalesMatrix.Get(Sales, RowDict) then
+                foreach MonthTxt in MonthList do
+                    if RowDict.Get(MonthTxt, Val) then
+                        Total += Val;
+            ExcelBuf.AddColumn(Total, false, '', false, false, false, '', ExcelBuf."Cell Type"::Number);
+        end;
+        ExcelBuf.NewRow();
     end;
 }
