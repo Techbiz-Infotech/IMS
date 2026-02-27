@@ -54,7 +54,7 @@ report 50052 "Monthly TEU Summary report"
     trigger OnPostReport()
     begin
         BuildMonths();
-        ExcelBuf.CreateNewBook('Container Analysis');
+        ExcelBuf.CreateNewBook('Customer Analysis');
 
         Clear(CustomerList); Clear(CustomerMatrix); Clear(CustomerSales);
         BuildCustomerData();
