@@ -246,10 +246,26 @@ table 50110 "Receiving Journal"
     }
     keys
     {
-        key(PK; "Line No.")
+        key(PK; "User ID", "Line No.")
         {
             Clustered = true;
         }
     }
+    //refactor for concurrent users
+    trigger OnInsert()
+    begin
+        "User ID" := USERID;
+
+    end;
+
+
+
+    procedure ClearMyLines()
+    var
+        MyLines: Record "Receiving Journal";
+    begin
+        MyLines.SetRange("User ID", USERID);
+        MyLines.DeleteAll();
+    end;
 
 }

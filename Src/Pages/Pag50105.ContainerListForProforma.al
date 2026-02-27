@@ -151,6 +151,7 @@ page 50105 ContainerListForProforma
         KPAChargesCalculated: Boolean;
     begin
         IF CloseAction IN [ACTION::OK, ACTION::LookupOK] THEN BEGIN
+            // always delete sales lines in the temporary if exist
             lrec_TmpSalesLine.reset;
             lrec_TmpSalesLine.DeleteAll();
 
@@ -205,7 +206,7 @@ page 50105 ContainerListForProforma
                         DimensionValue.SetRange("Dimension Code", GLSetup."Shortcut Dimension 4 Code");
                         DimensionValue.SetRange(Code, TempManifestLine."Shortcut Dimension 4 Code");
                         if DimensionValue.FindFirst() then;
-                       // KPAChargesCalculated := false;
+                        // KPAChargesCalculated := false;
                         if not DimensionValue."Skip KPA Charges" then begin
                             if TempManifestLine."KPA Charges Calculated" then
                                 KPAChargesCalculated := true

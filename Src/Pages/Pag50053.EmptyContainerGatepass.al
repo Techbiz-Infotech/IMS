@@ -1,9 +1,10 @@
-page 50155 "Gate Pass Out Card"
+page 50053 "Empty Container Gatepass"
 {
-    Caption = 'Gate Pass Outs';
-    pageType = Document;
+    ApplicationArea = All;
+    Caption = 'Empty Container Gatepass';
     SourceTable = "Gate Pass Out";
-    AboutTitle = 'About Gate Pass out details';
+    PageType = Document;
+
 
     layout
     {
@@ -33,11 +34,10 @@ page 50155 "Gate Pass Out Card"
                     ToolTip = 'Specifies the value of the Gate Pass Out Time field.';
                     ApplicationArea = All;
                 }
-                field("BL No."; Rec."BL No.")
+                field("Shortcut Dimension 6 Code"; Rec."Shortcut Dimension 6 Code")
                 {
-                    ToolTip = 'Specifies the value of the BL No. field.';
+                    ToolTip = 'Specifies the value of the Process Type field.';
                     ApplicationArea = All;
-
                 }
                 field("Job File No."; Rec."Job File No.")
                 {
@@ -80,7 +80,7 @@ page 50155 "Gate Pass Out Card"
 
 
             }
-            part(GatePassLines; "Gate Pass Out Subform")
+            part(GatePassLines; "Empty Container Subform")
             {
                 ApplicationArea = all;
                 SubPageLink = "Gate Pass No." = field("Gate Pass No.");

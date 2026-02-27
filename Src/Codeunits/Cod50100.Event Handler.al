@@ -62,7 +62,7 @@ codeunit 50100 Events
                                     TempJnlLine.VALIDATE("Journal Template Name", 'GENERAL');
                                     TempJnlLine.VALIDATE("Journal Batch Name", 'DEFAULT');
                                     TempJnlLine.VALIDATE("Line No.", 10000 * (TempJnlLine.COUNT + 1));
-                                    TempJnlLine.validate("Source Code",'SALES');
+                                    TempJnlLine.validate("Source Code", 'SALES');
                                     SalesLine.CalcFields("Posting Date");
                                     TempJnlLine.VALIDATE("Posting Date", SalesLine."Posting Date");
                                     TempJnlLine.VALIDATE("Document Type", 0);
@@ -217,6 +217,38 @@ codeunit 50100 Events
             end;
         end;
     end;
+    //change purchase description
+    [EventSubscriber(ObjectType::Table, Database::"G/L Entry", 'OnAfterInsertEvent', '', true, true)]
+    local procedure UpdateGLEntryDescriptionFromPostedLine(var Rec: Record "G/L Entry")
+    var
+        PurchInvLine: Record "Purch. Inv. Line";
+        PurchCrMemoLine: Record "Purch. Cr. Memo Line";
+
+    begin
+
+        if Rec."Source Type" <> Rec."Source Type"::"Fixed Asset" then
+            exit;
+
+        PurchInvLine.SetRange("Document No.", Rec."Document No.");
+        PurchInvLine.SetRange(Type, PurchInvLine.Type::"Fixed Asset");
+        PurchInvLine.SetRange("No.", Rec."Source No.");
+
+        if PurchInvLine.FindFirst() then begin
+            Rec.Description := PurchInvLine.Description;
+            Rec.Modify();
+            exit;
+        end;
+
+        PurchCrMemoLine.SetRange("Document No.", Rec."Document No.");
+        PurchCrMemoLine.SetRange(Type, PurchCrMemoLine.Type::"Fixed Asset");
+        PurchCrMemoLine.SetRange("No.", Rec."Source No.");
+
+        if PurchCrMemoLine.FindFirst() then begin
+            Rec.Description := PurchCrMemoLine.Description;
+            Rec.Modify();
+        end;
+    end;
+
 
     [EventSubscriber(ObjectType::Table, Database::"G/L Entry", 'OnAfterCopyGLEntryFromGenJnlLine', '', true, true)]
     local procedure OnAfterCopyGLEntryFromGenJnlLine(var GLEntry: Record "G/L Entry"; var GenJournalLine: Record "Gen. Journal Line")

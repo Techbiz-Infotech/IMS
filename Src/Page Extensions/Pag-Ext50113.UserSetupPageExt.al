@@ -99,7 +99,7 @@ pageextension 50113 UserSetupPageExt extends "User Setup"
     var
         myInt: Integer;
     begin
-        IF (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') and (UserId<>'USER_200C0CEF20D44143AF5956AEAF4B07F9') then
+        IF (UserId <> 'GROUP.AUDIT') and (UserId <> 'TECHBIZINFOTECH') and (UserId <> 'SHILLAH') then
             error('You are not Authorized to view this area. Please contact Group Audit');
     end;
 }
