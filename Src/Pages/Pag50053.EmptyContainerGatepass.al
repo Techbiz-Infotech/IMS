@@ -111,24 +111,7 @@ page 50053 "Empty Container Gatepass"
                     Rec.InsertGatePassLines();
                 end;
             }
-            action(VerifyReceipts)
-            {
-                ApplicationArea = All;
-                Caption = 'Verify Receipts & Get Lines';
-                Visible = PageEdit;
 
-                trigger OnAction()
-                var
-                    InvoiceStatus: page InvoiceStatusList;
-                begin
-                    // InvoiceStatus.LookupMode(true);
-                    // InvoiceStatus.GetGPNo(Rec."Gate Pass No.");
-                    // if InvoiceStatus.RunModal() = ACTION::LookupOK then begin
-
-                    // end;
-                    Rec.CheckPayments();
-                end;
-            }
             action(Approve)
             {
                 ApplicationArea = All;

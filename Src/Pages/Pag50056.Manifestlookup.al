@@ -1,18 +1,11 @@
-page 50300 "Manifests New"
+page 50056 "Manifest lookup"
 {
     ApplicationArea = All;
-    Caption = 'Manifests Lines';
+    Caption = 'Manifest lookup';
     PageType = List;
     SourceTable = "Manifest Line";
-    UsageCategory = Lists;
-    DelayedInsert = true;
-    AutoSplitKey = true;
-    InsertAllowed = false;
-
-    //Editable = false;
-    ModifyAllowed = false;
-    DeleteAllowed = false;
-    SourceTableView = sorting("Job File Date") order(descending);
+    Editable = false;
+    SourceTableTemporary = true;
     layout
     {
         area(content)
@@ -714,6 +707,7 @@ page 50300 "Manifests New"
         ContainerEdiatable();
         SalesPersonEditable();
         ContainerLockEditable();
+        CheckPayments();
     end;
     //added for stripped units 24/02/26
     trigger OnQueryClosePage(CloseAction: Action): Boolean
@@ -721,9 +715,29 @@ page 50300 "Manifests New"
         TempCLE: Record "Manifest Line" temporary;
     begin
         if CloseAction in [action::OK, action::LookupOK] then begin
-            if TempCLE.FindSet() then
+            if Rec.FINDSET then
                 repeat
-                    if rec."Parent Container ID" <> '' then
+                    TempCLE := Rec;
+                    TempCLE.INSERT;
+                    TempCLE.Modify();
+
+                until Rec.NEXT = 0;
+            GPHead.Reset();
+            GPHead.SetRange("Gate Pass No.", GPNo);
+            if GPHead.FindFirst() then begin
+                GPLine.Reset();
+                GPLine.SetRange("Gate Pass No.", GPHead."Gate Pass No.");
+                if GPLine.FindSet() then begin
+                    if Confirm('Do you want to delete the existing lines?', true) then
+                        GPLine.DeleteAll()
+                    else
+                        exit;
+                end;
+            end;
+
+            If TempCLE.FindSet() then
+                repeat
+                    if TempCLE."Parent Container ID" <> '' then
                         InsertStrippedGatePassLines(TempCLE);
                 until TempCLE.Next = 0;
 
@@ -830,8 +844,8 @@ page 50300 "Manifests New"
         ManiRec := Rec;
         ImsSetup.Get;
         ImsSetup.TestField("Job File Nos");
-        if NoSeriesMgt.LookupRelatedNoSeries(ImsSetup."Job File Nos", ManifestRec."No.Series", "No.Series") then begin
-            NoSeriesMgt.GetNextNo("Job File No.");
+        if NoSeriesMgt.LookupRelatedNoSeries(ImsSetup."Job File Nos", ManifestRec."No.Series", Rec."No.Series") then begin
+            NoSeriesMgt.GetNextNo(Rec."Job File No.");
             Rec := ManiRec;
             exit(true);
         end;
@@ -895,15 +909,15 @@ page 50300 "Manifests New"
             InvoiceCount := 0;
             ClosedCont := 0;
 
-            GPLine.Reset();
-            GPLine.SetRange("Gate Pass No.", GPHead."Gate Pass No.");
+            // GPLine.Reset();
+            // GPLine.SetRange("Gate Pass No.", GPHead."Gate Pass No.");
 
-            if GPLine.FindSet() then begin
-                if Confirm('Do you want to delete the existing lines?', true) then
-                    GPLine.DeleteAll()
-                else
-                    exit;
-            end;
+            // if GPLine.FindSet() then begin
+            //     if Confirm('Do you want to delete the existing lines?', true) then
+            //         GPLine.DeleteAll()
+            //     else
+            //         exit;
+            // end;
 
             // Check if Parent Invoice was paid.
             SalesInvLine.Reset();
@@ -1117,6 +1131,51 @@ page 50300 "Manifests New"
         end;
     end;
 
+    procedure CheckPayments()
+    var
+
+        SalesInvLine: Record "Sales Invoice Line";
+        EntryNo, LineNo : Integer;
+        TempCustLedgEntry: Record "Cust. Ledger Entry" temporary;
+        RecCustLedgEntry: Record "Cust. Ledger Entry";
+        PageInvoiceStatus: Page InvoiceStatusList;
+        PrevDocNo, PrevContainerNo : Code[20];
+        ManifestLine: Record "Manifest Line";
+        ManifestLookup: Page "Manifest lookup";
+        TempSelectedContainers: record "Manifest Line" temporary;
+
+    begin
+        If GatePass.get(GPNo) then;
+        SalesInvLine.Reset();
+        SalesInvLine.SetRange("BL No.", GatePass."BL No.");
+        SalesInvLine.CalcFields(Cancelled);
+        SalesInvLine.SetRange(Cancelled, false);
+        if SalesInvLine.FindSet() then begin
+            //Adding the stripped units flow for ones with the parent id
+            ManifestLine.Reset();
+            ManifestLine.SetRange("BL No.", SalesInvLine."BL No.");
+            ManifestLine.SetFilter("Parent Container ID", '<>%1', '');
+            if ManifestLine.FindSet() then begin
+                repeat
+                    Rec.init();
+                    Rec."Global Dimension 1 Code" := ManifestLine."Global Dimension 1 Code";
+                    Rec."Global Dimension 2 Code" := ManifestLine."Global Dimension 2 Code";
+                    Rec."Shortcut Dimension 3 Code" := ManifestLine."Shortcut Dimension 3 Code";
+                    Rec."Shortcut Dimension 4 Code" := ManifestLine."Shortcut Dimension 4 Code";
+                    Rec."Shortcut Dimension 5 Code" := ManifestLine."Shortcut Dimension 5 Code";
+                    Rec."Shortcut Dimension 6 Code" := ManifestLine."Shortcut Dimension 6 Code";
+                    Rec."Job File No." := ManifestLine."Job File No.";
+                    Rec."BL No." := ManifestLine."BL No.";
+                    Rec."Parent Container ID" := ManifestLine."Parent Container ID";
+                    Rec."Container/Chassis No." := ManifestLine."Container/Chassis No.";
+                    Rec.Insert();
+                until ManifestLine.Next() = 0;
+            end;
+        end else
+            Message('Invoice  not found');
+
+    End;
+
     procedure GetReceiptNo()
     var
         CustLedgEntry: Record "Cust. Ledger Entry";
@@ -1145,6 +1204,11 @@ page 50300 "Manifests New"
             until GatePassLineRec.next = 0;
         end;
     end;
+
+    var
+        GPHead: Record "Gate Pass Out";
+        GPLine, GatePassLine : Record "Gate Pass Out Line";
+
 
 
 }

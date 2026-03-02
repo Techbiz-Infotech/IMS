@@ -408,7 +408,8 @@ table 50150 "Gate Pass Out"
         PageInvoiceStatus: Page InvoiceStatusList;
         PrevDocNo, PrevContainerNo : Code[20];
         ManifestLine: Record "Manifest Line";
-        ManifestLookup: Page "Manifests New";
+        ManifestLookup: Page "Manifest lookup";
+        TempSelectedContainers: record "Manifest Line" temporary;
 
     begin
         SalesInvLine.Reset();
@@ -459,16 +460,32 @@ table 50150 "Gate Pass Out"
 
 
                 //Adding the stripped units flow for ones with the parent id
+
                 ManifestLine.Reset();
                 ManifestLine.SetRange("BL No.", SalesInvLine."BL No.");
                 ManifestLine.SetFilter("Parent Container ID", '<>%1', '');
-                if ManifestLine.FindSet() then begin
-                    ManifestLookup.SetTableView(ManifestLine);
-                    ManifestLookup.SetRecord(ManifestLine);
-                    ManifestLookup.GetGPNo(Rec."Gate Pass No.");
-                    ManifestLookup.LookupMode(true);
-                    if ManifestLookup.RunModal = ACTION::LookupOK then begin
-                    end;
+                if ManifestLine.FindSet() then
+                    repeat
+                        TempSelectedContainers.init();
+                        TempSelectedContainers."Global Dimension 1 Code" := ManifestLine."Global Dimension 1 Code";
+                        TempSelectedContainers."Global Dimension 2 Code" := ManifestLine."Global Dimension 2 Code";
+                        TempSelectedContainers."Shortcut Dimension 3 Code" := ManifestLine."Shortcut Dimension 3 Code";
+                        TempSelectedContainers."Shortcut Dimension 4 Code" := ManifestLine."Shortcut Dimension 4 Code";
+                        TempSelectedContainers."Shortcut Dimension 5 Code" := ManifestLine."Shortcut Dimension 5 Code";
+                        TempSelectedContainers."Shortcut Dimension 6 Code" := ManifestLine."Shortcut Dimension 6 Code";
+                        TempSelectedContainers."Job File No." := ManifestLine."Job File No.";
+                        TempSelectedContainers."BL No." := ManifestLine."BL No.";
+                        TempSelectedContainers."Parent Container ID" := ManifestLine."Parent Container ID";
+                        TempSelectedContainers."Container/Chassis No." := ManifestLine."Container/Chassis No.";
+                        TempSelectedContainers.Insert();
+                    until ManifestLine.Next() = 0;
+                clear(ManifestLookup);
+                ManifestLookup.SetTableView(TempSelectedContainers);
+                ManifestLookup.SetRecord(TempSelectedContainers);
+                ManifestLookup.GetGPNo(Rec."Gate Pass No.");
+                ManifestLookup.LookupMode(true);
+                if ManifestLookup.RunModal = ACTION::LookupOK then begin
+
                 end;
             end;
         end else
@@ -765,8 +782,7 @@ table 50150 "Gate Pass Out"
         PrevDocNo, PrevContainerNo : Code[20];
     begin
         ManifestLine.Reset();
-        ManifestLine.SetRange("BL No.", SalesInvLine."BL No.");
-        ManifestLine.SetFilter("Parent Container ID", '<>%1', '');
+        ManifestLine.SetRange("Shortcut Dimension 6 Code", Rec."Shortcut Dimension 6 Code");
         if ManifestLine.FindSet() then begin
             ManifestLookup.SetTableView(ManifestLine);
             ManifestLookup.SetRecord(ManifestLine);

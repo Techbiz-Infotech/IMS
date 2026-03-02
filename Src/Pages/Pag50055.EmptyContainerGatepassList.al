@@ -30,9 +30,9 @@ page 50055 "Empty Container Gatepass List"
                     ToolTip = 'Specifies the value of the Gate Pass Out Time field.';
                     ApplicationArea = All;
                 }
-                field("BL No."; Rec."BL No.")
+                field("Shortcut Dimension 6 Code"; Rec."Shortcut Dimension 6 Code")
                 {
-                    ToolTip = 'Specifies the value of the BL No. field.';
+                    ToolTip = 'Specifies the value of the Process Type field.';
                     ApplicationArea = All;
                 }
                 field("Clearing Agent"; rec."Clearing Agent")
